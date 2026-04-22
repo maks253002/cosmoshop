@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>COSMO</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+
+<style>
+:root{
+--bg:#0a0a0b;
+--card:#141416;
+--text:#fff;
+--muted:#8c8c8c;
+}
+
+*{margin:0;padding:0;box-sizing:border-box}
+
+body{
+font-family:'Inter',sans-serif;
+background:var(--bg);
+color:var(--text);
+cursor:none;
+overflow-x:hidden;
+}
+
+/* CUSTOM CURSOR */
+.cursor{
+width:20px;height:20px;
+border:1px solid white;
+border-radius:50%;
+position:fixed;
+pointer-events:none;
+transform:translate(-50%,-50%);
+transition:0.1s;
+z-index:9999;
+}
+
+/* NAV */
+header{
+position:fixed;
+width:100%;
+top:0;
+display:flex;
+justify-content:space-between;
+padding:25px 60px;
+background:rgba(0,0,0,0.5);
+backdrop-filter:blur(15px);
+z-index:1000;
+}
+
+.logo{font-weight:800;letter-spacing:3px}
+
+nav a{
+margin-left:30px;
+color:var(--muted);
+text-decoration:none;
+transition:0.3s;
+}
+nav a:hover{color:white}
+
+/* HERO VIDEO */
+.hero{
+height:100vh;
+position:relative;
+display:flex;
+align-items:center;
+padding:0 10%;
+overflow:hidden;
+}
+
+.hero video{
+position:absolute;
+width:100%;
+height:100%;
+object-fit:cover;
+z-index:-1;
+filter:brightness(0.4);
+}
+
+.hero h1{
+font-size:72px;
+max-width:600px;
+}
+
+/* SECTION */
+.section{padding:120px 10%}
+
+/* FILTER */
+.filters{
+display:flex;
+gap:15px;
+margin-bottom:30px;
+}
+.filter{
+padding:8px 16px;
+border:1px solid white;
+cursor:pointer;
+transition:0.3s;
+}
+.filter.active,.filter:hover{
+background:white;
+color:black;
+}
+
+/* PRODUCTS */
+.products{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+gap:30px;
+}
+
+.product{
+background:var(--card);
+padding:20px;
+border-radius:20px;
+transition:0.3s;
+transform-style:preserve-3d;
+}
+
+.product-img{
+height:280px;
+background:#222;
+border-radius:15px;
+margin-bottom:15px;
+}
+
+.product button{
+margin-top:10px;
+width:100%;
+padding:10px;
+border:1px solid white;
+background:transparent;
+color:white;
+transition:0.3s;
+}
+.product button:hover{
+background:white;
+color:black;
+}
+
+/* REVEAL */
+.reveal{
+opacity:0;
+transform:translateY(50px);
+transition:1s;
+}
+.reveal.active{
+opacity:1;
+transform:translateY(0);
+}
+
+/* CART */
+.cart{
+position:fixed;
+right:-400px;
+top:0;
+width:350px;
+height:100%;
+background:#111;
+padding:30px;
+transition:0.4s;
+}
+.cart.active{right:0}
+
+/* FOOTER */
+footer{
+text-align:center;
+padding:40px;
+color:var(--muted);
+}
+</style>
+</head>
+
+<body>
+
+<div class="cursor" id="cursor"></div>
+
+<header>
+<div class="logo">COSMO</div>
+<nav>
+<a href="#">Главная</a>
+<a href="#">Каталог</a>
+<a href="#" onclick="toggleCart()">Корзина</a>
+</nav>
+</header>
+
+<section class="hero">
+<video autoplay muted loop>
+<source src="https://cdn.coverr.co/videos/coverr-fashion-model-posing-5175/1080p.mp4" type="video/mp4">
+</video>
+<h1>Будущее стиля уже здесь</h1>
+</section>
+
+<section class="section reveal">
+<h2>Каталог</h2>
+
+<div class="filters">
+<div class="filter active" onclick="filterItems('all')">Все</div>
+<div class="filter" onclick="filterItems('men')">Мужское</div>
+<div class="filter" onclick="filterItems('women')">Женское</div>
+</div>
+
+<div class="products">
+
+<div class="product" data-cat="men">
+<div class="product-img"></div>
+<h3>Item</h3>
+<button onclick="addToCart('Item',100)">Добавить</button>
+</div>
+
+<div class="product" data-cat="women">
+<div class="product-img"></div>
+<h3>Item</h3>
+<button onclick="addToCart('Item',120)">Добавить</button>
+</div>
+
+</div>
+</section>
+
+<div class="cart" id="cart">
+<h2>Корзина</h2>
+<div id="items"></div>
+<div id="total"></div>
+</div>
+
+<footer>© COSMO 2026</footer>
+
+<script>
+/* CURSOR */
+const cursor=document.getElementById('cursor')
+document.addEventListener('mousemove',e=>{
+cursor.style.left=e.clientX+'px'
+cursor.style.top=e.clientY+'px'
+})
+
+/* REVEAL */
+window.addEventListener('scroll',()=>{
+document.querySelectorAll('.reveal').forEach(el=>{
+if(el.getBoundingClientRect().top<window.innerHeight-100){
+el.classList.add('active')
+}
+})
+})
+
+/* 3D CARDS */
+document.querySelectorAll('.product').forEach(card=>{
+card.addEventListener('mousemove',e=>{
+let x=(e.offsetX/card.clientWidth-0.5)*20
+let y=(e.offsetY/card.clientHeight-0.5)*20
+card.style.transform=`rotateY(${x}deg) rotateX(${-y}deg)`
+})
+card.addEventListener('mouseleave',()=>{
+card.style.transform='rotateY(0) rotateX(0)'
+})
+})
+
+/* FILTER */
+function filterItems(cat){
+document.querySelectorAll('.filter').forEach(f=>f.classList.remove('active'))
+event.target.classList.add('active')
+
+document.querySelectorAll('.product').forEach(p=>{
+p.style.display=(cat==='all'||p.dataset.cat===cat)?'block':'none'
+})
+}
+
+/* CART */
+let cart=[]
+function toggleCart(){
+document.getElementById('cart').classList.toggle('active')
+}
+function addToCart(name,price){
+cart.push({name,price})
+renderCart()
+}
+function renderCart(){
+let html='',total=0
+cart.forEach(i=>{
+total+=i.price
+html+=`<div>${i.name} - ${i.price}$</div>`
+})
+document.getElementById('items').innerHTML=html
+document.getElementById('total').innerText='Итого: '+total+'$'
+}
+</script>
+
+</body>
+</html>
